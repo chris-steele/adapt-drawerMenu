@@ -1,48 +1,46 @@
-define(function(require) {
+define([
+  'core/js/adapt',
+  './tocView'
+], function(Adapt, TocView) {
 
-    var Adapt = require('coreJS/adapt');
-    var Backbone = require('backbone');
+  var TocNavigationView = Backbone.View.extend({
 
-    var TocView = require('./tocView');
+    tagName: 'button',
 
-    var TocNavigationView = Backbone.View.extend({
+    className: 'btn-icon nav__btn nav__toc-btn js-nav-toc-btn toc-navigation',
 
-        tagName: 'button',
+    initialize: function() {
+      this.$el.attr('role', 'button');
+      this.ariaText = '';
 
-        className: 'base icon icon-home toc-navigation',
+      if (Adapt.course.has('_globals') && Adapt.course.get('_globals')._extensions && Adapt.course.get('_globals')._extensions._toc && Adapt.course.get('_globals')._extensions._toc.navigationToc) {
+        this.ariaText = Adapt.course.get('_globals')._extensions._toc.navigationToc;
+        this.$el.attr('aria-label', this.ariaText);
+      }
 
-        initialize: function() {
-            this.$el.attr('role', 'button');
-            this.ariaText = '';
-            
-            if (Adapt.course.has('_globals') && Adapt.course.get('_globals')._extensions && Adapt.course.get('_globals')._extensions._toc && Adapt.course.get('_globals')._extensions._toc.navigationToc) {
-                this.ariaText = Adapt.course.get('_globals')._extensions._toc.navigationToc;
-                this.$el.attr('aria-label', this.ariaText);
-            }
-            
-            this.render();
-        },
+      this.render();
+    },
 
-        events: {
-            'click': 'onClick'
-        },
+    events: {
+      'click': 'onClick'
+    },
 
-        render: function() {
-            var template = Handlebars.templates.tocNavigation;
-            $('.navigation-drawer-toggle-button').after(this.$el.html(template()));
-            return this;
-        },
+    render: function() {
+      var template = Handlebars.templates.tocNavigation;
+      $('.js-nav-back-btn').before(this.$el.html(template()));
+      return this;
+    },
 
-        onClick: function(event) {
-            if(event && event.preventDefault) event.preventDefault();
-            // put the drawer on the left
-            Adapt.trigger('drawer:setDrawerDir', Adapt.config.get('_defaultDirection') == 'rtl' ? 'right' : 'left');
-            // here is where you might customise what toc renders if so desired
-            Adapt.drawer.triggerCustomView(new TocView({cfg: Adapt.course.get('_toc') || {}}).$el, false);
-        }
+    onClick: function(event) {
+      if(event && event.preventDefault) event.preventDefault();
+      // put the drawer on the left
+      Adapt.trigger('drawer:setDrawerDir', Adapt.config.get('_defaultDirection') == 'rtl' ? 'right' : 'left');
+      // here is where you might customise what toc renders if so desired
+      Adapt.drawer.triggerCustomView(new TocView({cfg: Adapt.course.get('_toc') || {}}).$el, false);
+    }
 
-    });
+  });
 
-    return TocNavigationView;
+  return TocNavigationView;
 
 });
